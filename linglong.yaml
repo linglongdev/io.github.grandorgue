@@ -1,0 +1,114 @@
+version: "1"
+
+package:
+  id: io.github.grandorgue
+  name: grandorgue
+  version: 6.5.0.0
+  kind: app
+  description: |
+    GrandOrgue software
+
+base: org.deepin.foundation/23.0.0
+runtime: org.deepin.Runtime/23.0.1
+
+command:
+  - /opt/apps/io.github.grandorgue/files/bin/GrandOrgue
+
+sources:
+  - kind: git
+    url: https://github.com/GrandOrgue/grandorgue.git
+    commit: 3d49075c43f6478635275277439ab793f9ce10bd
+
+  - kind: git
+    url: https://github.com/wxWidgets/wxWidgets.git
+    commit: 44068b5550bc82ac535e82680d158d3e03d7aa5f
+
+  - kind: git
+    url: https://github.com/jbeder/yaml-cpp.git
+    commit: 47cd2725d61e54719933b83ea51c64ad60c24066
+
+  - kind: git
+    url: https://github.com/ImageMagick/ImageMagick6.git
+    commit: 176127050e68436fb35be696c8b14fe0efd364e9
+
+  - kind: file
+    url: https://community-packages.deepin.com/beige/pool/main/libw/libwmf/libwmf0.2-7_0.2.8.4-17_amd64.deb
+    digest: ae89bcbb2f70de1626837b7c3538b75561a1d0223709e9fa7cab811e141b9272
+
+  - kind: file
+    url: https://community-packages.deepin.com/beige/pool/main/c/curl/libcurl4_8.5.0-2_amd64.deb
+    digest: 6e3d5ad17b738939a392e5f7eb00c1f129529834ca62b053e677ad03e6a1e12c
+
+  - kind: file
+    url: https://community-packages.deepin.com/beige/pool/main/c/curl/libcurl4-openssl-dev_8.5.0-2_amd64.deb
+    digest: 273ce1a75b0e8b1e31f0ce3d8441f9c42cfa9729c55ebef528bc2157dc3d7a02
+
+  - kind: file
+    url: https://community-packages.deepin.com/beige/pool/main/f/fftw3/libfftw3-3_3.3.8-2_amd64.deb
+    digest: 5798e410e7d33e3bb307a1a61892db358b7502c4da29e3d86a4bf07cf19427d7
+
+  - kind: file
+    url: https://community-packages.deepin.com/beige/pool/main/f/fftw3/libfftw3-dev_3.3.8-2_amd64.deb
+    digest: 3aeaa1807aee3665a2eda9df08a16eb17449e54b139e7b7a9f9150d549d00945
+
+  - kind: file
+    url: https://community-packages.deepin.com/beige/pool/main/j/jack-audio-connection-kit/libjack0_0.125.0-3_amd64.deb
+    digest: 4c67b5f22237bc85e61020b35c997f196edf4f194aeaeff0085a5848faeb0ae6
+
+  - kind: file
+    url: https://community-packages.deepin.com/beige/pool/main/j/jack-audio-connection-kit/libjack-dev_0.125.0-3_amd64.deb
+    digest: c777d04f5ed3ee1ad2a2bacbd2b2f9b0924587cc87c98b1e66d776a36ca4a4c4
+
+  - kind: file
+    url: https://community-packages.deepin.com/beige/pool/main/j/jackd2/libjack-jackd2-dev_1.9.21~dfsg-3_amd64.deb
+    digest: 92b02ec1ffcbeda0a625a86bac25922edc7a5d3e991f5e39fb5fa6c56695123f
+
+  - kind: file
+    url: https://community-packages.deepin.com/beige/pool/main/w/wavpack/libwavpack1_5.4.0-1_amd64.deb
+    digest: 4ac1acbfdd1a76a3e42bc193729cb09e7daab9e076223aed2400817b652877f4
+
+  - kind: file
+    url: https://community-packages.deepin.com/beige/pool/main/w/wavpack/libwavpack-dev_5.4.0-1_amd64.deb
+    digest: 0c1f5c75e407af0f4e1da4064a63f66c6304c4d57b206c60d3c137e083d6ed8e
+
+  - kind: file
+    url: https://community-packages.deepin.com/beige/pool/main/j/jackd2/jackd2_1.9.21~dfsg-3_amd64.deb
+    digest: 499cfdd98691f59e885d55fa898d6f99467dffeec71a3b349d207b85ecce6c08
+
+  - kind: file
+    url: https://community-packages.deepin.com/beige/pool/main/j/jackd2/jackd2-firewire_1.9.21~dfsg-3_amd64.deb
+    digest: 6a7f1444d864c3ad2f438539d95ba3e5076a4be3e2efd6e656851a57ea4a271c
+
+build: |
+  echo "" > $PREFIX/packages.list
+  bash ./install_dep linglong/sources "$PREFIX"
+  export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:${PREFIX}/lib:${PREFIX}/lib/${TRIPLET}
+  
+  cd /project/linglong/sources/wxWidgets.git/
+  cmake -Bbuild \
+        -DCMAKE_INSTALL_PREFIX=${PREFIX} \
+        -DCMAKE_INSTALL_LIBDIR=${PREFIX}/lib/${TRIPLET}
+  cmake --build build
+  cmake --build build --target install
+  
+  cd /project/linglong/sources/yaml-cpp.git/
+  cmake -Bbuild \
+        -DCMAKE_INSTALL_PREFIX=${PREFIX} \
+        -DCMAKE_INSTALL_LIBDIR=${PREFIX}/lib/${TRIPLET}
+  cmake --build build
+  cmake --build build --target install
+  
+  cd /project/linglong/sources/ImageMagick6.git/
+  ./configure --prefix=${PREFIX} --exec-prefix=${PREFIX}
+  make
+  make install
+  
+  cd /project/linglong/sources/grandorgue.git/
+  git apply /project/patches/0001-fix-img.patch
+  cp /project/GrandOrgue.png /project/linglong/sources/grandorgue.git/resources/GrandOrgue.png
+  cmake -Bbuild \
+        -DCMAKE_INSTALL_PREFIX=${PREFIX} \
+        -DCMAKE_INSTALL_LIBDIR=${PREFIX}/lib/${TRIPLET} \
+        -DCMAKE_BUILD_TYPE=Release 
+  cmake --build build
+  cmake --build build --target install

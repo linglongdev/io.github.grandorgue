@@ -1,0 +1,73 @@
+From 2ece2ce02c225fea691654e9c0aa09223e42f0e9 Mon Sep 17 00:00:00 2001
+From: Shenyufan <751890223@qq.com>
+Date: Mon, 9 Sep 2024 21:22:34 +0800
+Subject: [PATCH] fix-img
+
+---
+ resources/CMakeLists.txt | 20 ++++++++++----------
+ 1 file changed, 10 insertions(+), 10 deletions(-)
+
+diff --git a/resources/CMakeLists.txt b/resources/CMakeLists.txt
+index 3d7425c5..bf8caab3 100644
+--- a/resources/CMakeLists.txt
++++ b/resources/CMakeLists.txt
+@@ -6,7 +6,7 @@
+ set(DEPLIST)
+ 
+ # ========================
+-# Generate icons from svg
++# Generate icons from png
+ # ========================
+ 
+ # Find ImageMagick
+@@ -17,8 +17,8 @@ find_program(ImageMagick_convert_EXECUTABLE convert)
+ # 1. Windows application icon (included from GrandOrgue.rc that is copied below and included from ${CMAKE_SOURCE_DIR}/src/grandorgue/CMakeLists.txt)
+ # 2. Conversion into .cpp and usage in GO code (in ${CMAKE_SOURCE_DIR}/src/images/CMakeLists.txt)
+ ADD_CUSTOM_COMMAND(OUTPUT "${RESOURCEDIR}/GOIcon.ico"
+-                     COMMAND ${ImageMagick_convert_EXECUTABLE} -background none -resize 32x32 "${CMAKE_SOURCE_DIR}/resources/GrandOrgue.svg" "${RESOURCEDIR}/GOIcon.ico" 
+-                     DEPENDS ${CMAKE_SOURCE_DIR}/resources/GrandOrgue.svg)
++                     COMMAND ${ImageMagick_convert_EXECUTABLE}  -resize 32x32 "${CMAKE_SOURCE_DIR}/resources/GrandOrgue.png" "${RESOURCEDIR}/GOIcon.ico" 
++                     DEPENDS ${CMAKE_SOURCE_DIR}/resources/GrandOrgue.png)
+ # Following files reference GOIcon.ico by a relative path, because of that they need to be placed near GOIcon.ico
+ ADD_CUSTOM_COMMAND(OUTPUT "${RESOURCEDIR}/GrandOrgue.rc"
+                    COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_SOURCE_DIR}/resources/GrandOrgue.rc" "${RESOURCEDIR}/GrandOrgue.rc"
+@@ -29,21 +29,21 @@ ADD_CUSTOM_COMMAND(OUTPUT "${RESOURCEDIR}/GrandOrgue.manifest"
+ # Without that instuctions on building files above doesn't being added to Makefile
+ LIST(APPEND DEPLIST "${RESOURCEDIR}/GOIcon.ico" "${RESOURCEDIR}/GrandOrgue.rc" "${RESOURCEDIR}/GrandOrgue.manifest" ${GENERATED_ICONS})
+ 
+-# Configure generation of icons & create directory for generated .png icons
++# Configure generation of icons & create directory for generated . icons
+ # Directory is named GrandOrgue.iconset because iconutil (for MacOS) requires such name
+ # Icons from this directory will be included into linux package (with renaming) and into MacOS icons (assembled into archive via iconutil)
+ set(ICON_SIZES 16 32 64 128 256 512 1024)
+ set(GENERATED_ICONS_DIR "${RESOURCEDIR}/GrandOrgue.iconset" )
+ ADD_CUSTOM_COMMAND(OUTPUT ${GENERATED_ICONS_DIR} COMMAND ${CMAKE_COMMAND} -E make_directory ${GENERATED_ICONS_DIR})
+ 
+-# Setup commands to generate .png icons of different sizes
++# Setup commands to generate . icons of different sizes
+ # GENERATED_ICONS contains paths to generated icons
+ set(GENERATED_ICONS)
+ foreach(ICON_SIZE IN ITEMS ${ICON_SIZES})
+-  LIST(APPEND GENERATED_ICONS "${GENERATED_ICONS_DIR}/icon_${ICON_SIZE}x${ICON_SIZE}.png" )
+-  ADD_CUSTOM_COMMAND(OUTPUT "${GENERATED_ICONS_DIR}/icon_${ICON_SIZE}x${ICON_SIZE}.png" 
+-                     COMMAND ${ImageMagick_convert_EXECUTABLE} -background none -resize ${ICON_SIZE}x${ICON_SIZE} "${CMAKE_SOURCE_DIR}/resources/GrandOrgue.svg" "${GENERATED_ICONS_DIR}/icon_${ICON_SIZE}x${ICON_SIZE}.png"
+-                     DEPENDS ${CMAKE_SOURCE_DIR}/resources/GrandOrgue.svg ${GENERATED_ICONS_DIR})
++  LIST(APPEND GENERATED_ICONS "${GENERATED_ICONS_DIR}/icon_${ICON_SIZE}x${ICON_SIZE}." )
++  ADD_CUSTOM_COMMAND(OUTPUT "${GENERATED_ICONS_DIR}/icon_${ICON_SIZE}x${ICON_SIZE}." 
++                     COMMAND ${ImageMagick_convert_EXECUTABLE} -background none -resize ${ICON_SIZE}x${ICON_SIZE} "${CMAKE_SOURCE_DIR}/resources/GrandOrgue.png" "${GENERATED_ICONS_DIR}/icon_${ICON_SIZE}x${ICON_SIZE}."
++                     DEPENDS ${CMAKE_SOURCE_DIR}/resources/GrandOrgue.png ${GENERATED_ICONS_DIR})
+ endforeach()
+ 
+ # ========================
+@@ -64,7 +64,7 @@ elseif(UNIX)
+   # Install generated icons for linux 
+   LIST(APPEND DEPLIST ${GENERATED_ICONS})
+   foreach(ICON_SIZE IN ITEMS ${ICON_SIZES})
+-    INSTALL(FILES "${GENERATED_ICONS_DIR}/icon_${ICON_SIZE}x${ICON_SIZE}.png" RENAME GrandOrgue.png DESTINATION share/icons/hicolor/${ICON_SIZE}x${ICON_SIZE}/apps)
++    INSTALL(FILES "${GENERATED_ICONS_DIR}/icon_${ICON_SIZE}x${ICON_SIZE}." RENAME GrandOrgue. DESTINATION share/icons/hicolor/${ICON_SIZE}x${ICON_SIZE}/apps)
+   endforeach()
+ 
+   install(FILES grandorgue.xml DESTINATION share/mime/packages)
+-- 
+2.43.4
+
